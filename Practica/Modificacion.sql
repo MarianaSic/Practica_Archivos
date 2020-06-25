@@ -2,12 +2,16 @@
 alter table evento drop column fecha;
 alter table evento drop column hora;
 alter table EVENTO add fecha_hora timestamp;
--- el formato es 'dd/mm/aaaa hh:mm:ss.ss'
-set datestyle to 'European';
+set datestyle to European;
 
 -- INCISO 3
-alter table evento add constraint intervalo_fecha 
+alter table evento add constraint fecha_limite 
 check (fecha_hora >= '24/07/2020 09:00:00.00' and fecha_hora <= '09/08/2020 20:00:00.00');
+insert into evento (cod_evento,fecha_hora,ubicacion,cod_disciplina,cod_participacion,cod_categoria)
+	values (6,'24/07/2020 08:59:00.00',4,10,3,1);
+insert into evento (cod_evento,fecha_hora,ubicacion,cod_disciplina,cod_participacion,cod_categoria)
+	values (6,'09/08/2020 20:00:01.00',4,10,3,1);
+
 
 -- INCISO 4
 -- 4.a
@@ -19,11 +23,11 @@ create table sede (
 alter table evento alter column ubicacion type integer using (ubicacion::integer);
 
 -- 4.c
-alter table evento add constraint ubicacion foreign key (ubicacion) references sede;
+alter table evento add constraint ubicacion foreign key (ubicacion) references sede (codigo);
 
 -- INCISO 5
-alter table miembro drop telefono;
-alter table miembro add telefono integer null default 0;
+alter table miembro drop column telefono;
+alter table miembro add column telefono integer null default 0;
 
 -- INCISO 7
 alter table pais drop constraint nombre_pais;
@@ -42,14 +46,15 @@ create table disciplina_atleta (
     constraint DISCIPLINA_cod_disciplina foreign key (cod_disciplina) references disciplina
 );
 
--- INCISO 9
-alter table costo_evento alter column tarifa type decimal(20,2) USING (tarifa::decimal(20,2));
+-- INCISO 9 12345678.90
+alter table costo_evento alter column tarifa type decimal(10,2) using (tarifa::decimal(10,2));
 
 -- INCISO 10
 alter table medallero drop constraint TIPO_MEDALLA_cod_tipo,
 add constraint TIPO_MEDALLA_cod_tipo foreign key (cod_tipo) references tipo_medalla on delete cascade;
 delete from tipo_medalla where cod_tipo=4;
 select * from tipo_medalla;
+select * from medallero;
 
 -- INCISO 11
 drop table costo_evento;
@@ -59,6 +64,7 @@ drop table televisora;
 alter table evento drop constraint DISCIPLINA_cod_disciplina,
 add constraint DISCIPLINA_cod_disciplina foreign key (cod_disciplina) references disciplina on delete cascade;
 delete from disciplina;
+select * from disciplina;
 
 -- INCISO 13
 update miembro set telefono=55464601 where nombre='Laura' and apellido='Cunha Silva';
@@ -70,3 +76,7 @@ alter table atleta add fotografia oid null;
 
 -- INCISO 15
 alter table atleta add constraint restriccion_edad check (edad < 25);
+select * from atleta;
+insert into atleta (cod_atleta,nombre,apellido,edad,participantes,cod_disciplina,cod_pais) 
+values (1,'Mariana','Sic',22,'Participacion clase Archivos',2,1);
+
